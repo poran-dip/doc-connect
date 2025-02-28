@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .auth-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .appointment-container {
+            margin-top: 30px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        form {
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, select, button {
+            margin-top: 5px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            padding: 12px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .emergency-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .emergency-checkbox input {
+            margin-right: 10px;
+            margin-top: 0;
+        }
+        .appointments-list {
+            margin-top: 30px;
+        }
+        .appointment-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .appointment-status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status-pending {
+            color: #f39c12;
+        }
+        .status-assigned {
+            color: #3498db;
+        }
+        .status-completed {
+            color: #27ae60;
+        }
+        .status-cancelled {
+            color: #e74c3c;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SmartHospital Patient Portal</h1>
+            <div id="userStatus"></div>
+        </div>
+        
+        <div id="authSection" class="auth-container">
+            <h2>Sign In</h2>
+            <form id="loginForm">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" required>
+                
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
+                
+                <button type="submit">Sign In</button>
+            </form>
+            
+            <p>Don't have an account? <a href="#" id="showRegisterForm">Register here</a></p>
+            
+            <form id="registerForm" class="hidden">
+                <h2>Register</h2>
+                <label for="registerName">Full Name:</label>
+                <input type="text" id="registerName" required>
+                
+                <label for="registerEmail">Email:</label>
+                <input type="email" id="registerEmail" required>
+                
+                <label for="registerAge">Age:</label>
+                <input type="number" id="registerAge" required>
+                
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" required>
+                
+                <button type="submit">Register</button>
+                <p><a href="#" id="showLoginForm">Back to Login</a></p>
+            </form>
+        </div>
+        
+        <div id="appointmentSection" class="appointment-container hidden">
+            <h2>Request an Appointment</h2>
+            <form id="appointmentForm">
+                <label for="department">Department (Specialization):</label>
+                <select id="department" required>
+                    <option value="General Medicine">General Medicine</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                </select>
+                
+                <label for="appointmentTime">Appointment Time:</label>
+                <input type="datetime-local" id="appointmentTime" required>
+                
+                <div class="emergency-checkbox">
+                    <input type="checkbox" id="emergency">
+                    <label for="emergency">Request as Emergency</label>
+                </div>
+                
+                <button type="submit">Submit Request</button>
+            </form>
+            
+            <div class="appointments-list">
+                <h2>My Appointments</h2>
+                <div id="appointmentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store user data
+        let currentUser = null;
+        let authToken = localStorage.getItem('authToken');
+        
+        // DOM elements
+        const authSection = document.getElementById('authSection');
+        const appointmentSection = document.getElementById('appointmentSection');
+        const userStatus = document.getElementById('userStatus');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegisterForm = document.getElementById('showRegisterForm');
+        const showLoginForm = document.getElementById('showLoginForm');
+        const appointmentForm = document.getElementById('appointmentForm');
+        const appointmentsList = document.getElementById('appointmentsList');
+        
+        // Toggle between login and register forms
+        showRegisterForm.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+        
+        showLoginForm.addEventListener('click', function(e) {
+            e.preventDefault();
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+        
+        // Check if user is logged in
+        if (authToken) {
+            fetchUserData();
+        }
+        
+        // Login form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/patient/signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('authToken', data.token);
+                    currentUser = data.user;
+                    showAppointmentSection();
+                    fetchAppointments();
+                } else {
+                    alert(data.message || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+        
+        // Register form submission
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const age = document.getElementById('registerAge').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const response = await fetch('/api/patient/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, age, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    registerForm.classList.add('hidden');
+                    loginForm.classList.remove('hidden');
+                } else {
+                    alert(data.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+        
+        // Appointment form submission
+        appointmentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please log in to request an appointment.');
+                return;
+            }
+            
+            const department = document.getElementById('department').value;
+            const appointmentTime = document.getElementById('appointmentTime').value;
+            const emergency = document.getElementById('emergency').checked;
+            
+            try {
+                const response = await fetch('/api/patient/request-appointment', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        name: currentUser.name,
+                        age: currentUser.age,
+                        department,
+                        appointmentTime,
+                        emergency
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Appointment request submitted successfully!');
+                    appointmentForm.reset();
+                    fetchAppointments();
+                } else {
+                    alert(data.message || 'Failed to submit appointment request.');
+                }
+            } catch (error) {
+                console.error('Error submitting appointment request:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+        
+        // Helper functions
+        async function fetchUserData() {
+            try {
+                const response = await fetch('/api/patient/my-appointments', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Try to get user info from the token or pass user details in the appointments response
+                    currentUser = { 
+                        name: data.user?.name || 'Patient', 
+                        id: data.user?.id,
+                        loggedIn: true 
+                    };
+                    showAppointmentSection();
+                    renderAppointments(data.appointments);
+                } else {
+                    // Token invalid or expired
+                    localStorage.removeItem('authToken');
+                    alert('Session expired. Please log in again.');
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                localStorage.removeItem('authToken');
+                alert('An error occurred. Please log in again.');
+            }
+        }
+
+        function showAppointmentSection() {
+            authSection.classList.add('hidden');
+            appointmentSection.classList.remove('hidden');
+            userStatus.innerHTML = `<p>Welcome, ${currentUser.name || 'Patient'} | <a href="#" id="logoutBtn">Logout</a></p>`;
+            
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        }
+        
+        function logout() {
+            localStorage.removeItem('authToken');
+            currentUser = null;
+            authToken = null;
+            
+            authSection.classList.remove('hidden');
+            appointmentSection.classList.add('hidden');
+            userStatus.innerHTML = '';
+        }
+        
+        async function fetchAppointments() {
+            if (!authToken) return;
+            
+            try {
+                const response = await fetch('/api/patient/my-appointments', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    renderAppointments(data.appointments || []);
+                } else {
+                    console.error('Failed to fetch appointments');
+                    appointmentsList.innerHTML = '<p>Unable to load appointments.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+                appointmentsList.innerHTML = '<p>Error loading appointments.</p>';
+            }
+        }
+        
+        function renderAppointments(appointments) {
+            appointmentsList.innerHTML = '';
+            
+            if (!appointments || appointments.length === 0) {
+                appointmentsList.innerHTML = '<p>No appointments found.</p>';
+                return;
+            }
+            
+            appointments.forEach(appointment => {
+                const date = new Date(appointment.appointmentTime);
+                const formattedDate = date.toLocaleDateString();
+                const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                let statusClass = '';
+                switch(appointment.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        break;
+                    case 'assigned':
+                        statusClass = 'status-assigned';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        break;
+                    case 'cancelled':
+                        statusClass = 'status-cancelled';
+                        break;
+                }
+                
+                let doctorInfo = '';
+                if (appointment.assignedDoctor) {
+                    doctorInfo = `<p><strong>Doctor:</strong> ${appointment.assignedDoctor.name} (${appointment.assignedDoctor.specialization})</p>`;
+                }
+                
+                const html = `
+                    <div class="appointment-card">
+                        <h3>Appointment for ${appointment.department}</h3>
+                        <p><strong>Date:</strong> ${formattedDate}</p>
+                        <p><strong>Time:</strong> ${formattedTime}</p>
+                        <p><strong>Emergency:</strong> ${appointment.emergency ? 'Yes' : 'No'}</p>
+                        ${doctorInfo}
+                        <p class="appointment-status ${statusClass}">Status: ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}</p>
+                    </div>
+                `;
+                
+                appointmentsList.innerHTML += html;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Smart Hospital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #appointmentsList .card-header {
+            background-color: #6c757d;
+            color: white;
+        }
+        .emergency {
+            background-color: #dc3545 !important;
+        }
+        .badge-emergency {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .status-toggle {
+            margin-right: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        #loginCard {
+            max-width: 500px;
+            margin: 100px auto;
+        }
+        #dashboardContent {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Smart Hospital - Doctor Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item hidden" id="navLogout">
+                        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" 
+                       required 
+                       autocomplete="email" 
+                       aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" 
+                       required 
+                       autocomplete="current-password" 
+                       aria-describedby="passwordHelp">
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="hidden">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h2>Welcome, <span id="doctorName"></span></h2>
+                    <p>Specialization: <span id="doctorSpecialization"></span></p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="status-toggle d-inline-block">
+                        <span class="me-2">Status:</span>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-success" id="statusAvailable">Available</button>
+                            <button type="button" class="btn btn-outline-danger" id="statusBusy">Busy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>My Assigned Appointments</h4>
+                </div>
+                <div class="card-body">
+                    <div id="appointmentsList">
+                        <div class="text-center" id="noAppointments">
+                            <p>No appointments assigned to you at the moment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Template -->
+    <template id="appointmentTemplate">
+        <div class="card mb-3 appointment-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 patient-name"></h5>
+                    <span class="badge-emergency hidden">EMERGENCY</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p><strong>Age:</strong> <span class="patient-age"></span></p>
+                        <p><strong>Department:</strong> <span class="department"></span></p>
+                        <p><strong>Appointment Time:</strong> <span class="appointment-time"></span></p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-success complete-btn">Complete Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM Elements
+        const loginCard = document.getElementById('loginCard');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const navLogout = document.getElementById('navLogout');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const doctorName = document.getElementById('doctorName');
+        const doctorSpecialization = document.getElementById('doctorSpecialization');
+        const statusAvailable = document.getElementById('statusAvailable');
+        const statusBusy = document.getElementById('statusBusy');
+        const appointmentsList = document.getElementById('appointmentsList');
+        const noAppointments = document.getElementById('noAppointments');
+        const appointmentTemplate = document.getElementById('appointmentTemplate');
+
+        // Check if doctor is logged in
+        function checkAuth() {
+            const token = localStorage.getItem('doctorToken');
+            if (token) {
+                const doctor = JSON.parse(localStorage.getItem('doctor'));
+                setupDashboard(doctor);
+                fetchAppointments();
+                return true;
+            }
+            return false;
+        }
+
+        // Setup dashboard with doctor info
+        function setupDashboard(doctor) {
+            loginCard.classList.add('hidden');
+            dashboardContent.classList.remove('hidden');
+            navLogout.classList.remove('hidden');
+            
+            doctorName.textContent = doctor.name;
+            doctorSpecialization.textContent = doctor.specialization;
+            
+            // Set active status button
+            if (doctor.status === 'available') {
+                statusAvailable.classList.add('btn-success');
+                statusAvailable.classList.remove('btn-outline-success');
+                statusBusy.classList.add('btn-outline-danger');
+                statusBusy.classList.remove('btn-danger');
+            } else {
+                statusBusy.classList.add('btn-danger');
+                statusBusy.classList.remove('btn-outline-danger');
+                statusAvailable.classList.add('btn-outline-success');
+                statusAvailable.classList.remove('btn-success');
+            }
+        }
+
+        // Fetch doctor's appointments
+        async function fetchAppointments() {
+            try {
+                const token = localStorage.getItem('doctorToken');
+                const response = await fetch('/api/doctor/my-appointments', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // Clear existing appointments
+                while (appointmentsList.children.length > 1) {
+                    appointmentsList.removeChild(appointmentsList.lastChild);
+                }
+                
+                if (data.appointments && data.appointments.length > 0) {
+                    noAppointments.classList.add('hidden');
+                    renderAppointments(data.appointments);
+                } else {
+                    noAppointments.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+            }
+        }
+
+        // Render appointments
+        function renderAppointments(appointments) {
+            appointments.forEach(appointment => {
+                const appointmentElement = document.importNode(appointmentTemplate.content, true);
+                
+                // Fill in appointment data
+                appointmentElement.querySelector('.patient-name').textContent = appointment.name;
+                appointmentElement.querySelector('.patient-age').textContent = appointment.age;
+                appointmentElement.querySelector('.department').textContent = appointment.department;
+                appointmentElement.querySelector('.appointment-time').textContent = new Date(appointment.appointmentTime).toLocaleString();
+                
+                // Handle emergency styling
+                if (appointment.emergency) {
+                    appointmentElement.querySelector('.badge-emergency').classList.remove('hidden');
+                    appointmentElement.querySelector('.card-header').classList.add('emergency');
+                }
+                
+                // Add appointment ID as data attribute
+                const appointmentCard = appointmentElement.querySelector('.appointment-card');
+                appointmentCard.dataset.id = appointment._id;
+                
+                // Add to list
+                appointmentsList.appendChild(appointmentElement);
+            });
+            
+            // Add event listeners to complete buttons
+            document.querySelectorAll('.complete-btn').forEach(button => {
+                button.addEventListener('click', handleCompleteAppointment);
+            });
+        }
+
+        // Handle complete appointment
+        async function handleCompleteAppointment(event) {
+            const appointmentCard = event.target.closest('.appointment-card');
+            const appointmentId = appointmentCard.dataset.id;
+            
+            try {
+                const token = localStorage.getItem('doctorToken');
+                const response = await fetch('/api/doctor/complete-appointment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ appointmentId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Remove the appointment card
+                    appointmentCard.remove();
+                    
+                    // Update doctor status
+                    updateDoctorStatus('available');
+                    
+                    // Show no appointments message if needed
+                    if (appointmentsList.querySelectorAll('.appointment-card').length === 0) {
+                        noAppointments.classList.remove('hidden');
+                    }
+                } else {
+                    alert(data.message || 'Error completing appointment');
+                }
+            } catch (error) {
+                console.error('Error completing appointment:', error);
+                alert('Error completing appointment');
+            }
+        }
+
+        // Update doctor status
+        async function updateDoctorStatus(status) {
+            try {
+                const token = localStorage.getItem('doctorToken');
+                const response = await fetch('/api/doctor/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Update stored doctor info
+                    const doctor = JSON.parse(localStorage.getItem('doctor'));
+                    doctor.status = status;
+                    localStorage.setItem('doctor', JSON.stringify(doctor));
+                    
+                    // Update UI
+                    if (status === 'available') {
+                        statusAvailable.classList.add('btn-success');
+                        statusAvailable.classList.remove('btn-outline-success');
+                        statusBusy.classList.add('btn-outline-danger');
+                        statusBusy.classList.remove('btn-danger');
+                    } else {
+                        statusBusy.classList.add('btn-danger');
+                        statusBusy.classList.remove('btn-outline-danger');
+                        statusAvailable.classList.add('btn-outline-success');
+                        statusAvailable.classList.remove('btn-success');
+                    }
+                } else {
+                    alert(data.message || 'Error updating status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status');
+            }
+        }
+
+        // Event Listeners
+        loginForm.addEventListener('submit', handleLogin);
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/doctor/signin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Successful login
+                    localStorage.setItem('doctorToken', data.token);
+                    localStorage.setItem('doctor', JSON.stringify(data.doctor));
+                    loginError.classList.add('hidden');
+                    setupDashboard(data.doctor);
+                    fetchAppointments();
+                } else {
+                    // Handle different types of errors
+                    switch(response.status) {
+                        case 403:
+                            loginError.textContent = 'Invalid credentials. Please check your email and password.';
+                            break;
+                        case 500:
+                            loginError.textContent = 'Server error. Please try again later.';
+                            break;
+                        default:
+                            loginError.textContent = data.message || 'An unexpected error occurred.';
+                    }
+                    loginError.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                loginError.textContent = 'Network error. Please check your connection.';
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        statusAvailable.addEventListener('click', () => updateDoctorStatus('available'));
+        statusBusy.addEventListener('click', () => updateDoctorStatus('busy'));
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('doctorToken');
+            localStorage.removeItem('doctor');
+            dashboardContent.classList.add('hidden');
+            navLogout.classList.add('hidden');
+            loginCard.classList.remove('hidden');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        // Check authentication on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) {
+                loginCard.classList.remove('hidden');
+            }
+        });
+
+        // Refresh appointments every 30 seconds
+        setInterval(() => {
+            if (localStorage.getItem('doctorToken')) {
+                fetchAppointments();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
