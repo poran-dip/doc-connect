@@ -63,23 +63,33 @@
 
     <div class="container">
         <!-- Login Form -->
-        <form id="loginForm">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" 
-                       required 
-                       autocomplete="email" 
-                       aria-describedby="emailHelp">
+        <div id="loginCard" class="card">
+            <div class="card-header">
+                <h4>Doctor Login</h4>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" 
-                       required 
-                       autocomplete="current-password" 
-                       aria-describedby="passwordHelp">
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" 
+                               required 
+                               autocomplete="email" 
+                               aria-describedby="emailHelp">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" 
+                               required 
+                               autocomplete="current-password" 
+                               aria-describedby="passwordHelp">
+                    </div>
+                    <div id="loginError" class="alert alert-danger hidden">
+                        <span id="errorMessage"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+        </div>
         
         <!-- Dashboard Content -->
         <div id="dashboardContent" class="hidden">
@@ -145,6 +155,7 @@
         const dashboardContent = document.getElementById('dashboardContent');
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
+        const errorMessage = document.getElementById('errorMessage');
         const navLogout = document.getElementById('navLogout');
         const logoutBtn = document.getElementById('logoutBtn');
         const doctorName = document.getElementById('doctorName');
@@ -160,9 +171,11 @@
             const token = localStorage.getItem('doctorToken');
             if (token) {
                 const doctor = JSON.parse(localStorage.getItem('doctor'));
-                setupDashboard(doctor);
-                fetchAppointments();
-                return true;
+                if (doctor) {
+                    setupDashboard(doctor);
+                    fetchAppointments();
+                    return true;
+                }
             }
             return false;
         }
@@ -173,8 +186,8 @@
             dashboardContent.classList.remove('hidden');
             navLogout.classList.remove('hidden');
             
-            doctorName.textContent = doctor.name;
-            doctorSpecialization.textContent = doctor.specialization;
+            doctorName.textContent = doctor.name || 'Doctor';
+            doctorSpecialization.textContent = doctor.specialization || 'General';
             
             // Set active status button
             if (doctor.status === 'available') {
@@ -194,11 +207,19 @@
         async function fetchAppointments() {
             try {
                 const token = localStorage.getItem('doctorToken');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
                 const response = await fetch('/api/doctor/my-appointments', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
@@ -215,6 +236,7 @@
                 }
             } catch (error) {
                 console.error('Error fetching appointments:', error);
+                showError('Failed to load appointments. Please try again.');
             }
         }
 
@@ -224,10 +246,12 @@
                 const appointmentElement = document.importNode(appointmentTemplate.content, true);
                 
                 // Fill in appointment data
-                appointmentElement.querySelector('.patient-name').textContent = appointment.name;
-                appointmentElement.querySelector('.patient-age').textContent = appointment.age;
-                appointmentElement.querySelector('.department').textContent = appointment.department;
-                appointmentElement.querySelector('.appointment-time').textContent = new Date(appointment.appointmentTime).toLocaleString();
+                appointmentElement.querySelector('.patient-name').textContent = appointment.name || 'Unknown Patient';
+                appointmentElement.querySelector('.patient-age').textContent = appointment.age || 'N/A';
+                appointmentElement.querySelector('.department').textContent = appointment.department || 'General';
+                appointmentElement.querySelector('.appointment-time').textContent = appointment.appointmentTime 
+                    ? new Date(appointment.appointmentTime).toLocaleString()
+                    : 'Not specified';
                 
                 // Handle emergency styling
                 if (appointment.emergency) {
@@ -279,11 +303,11 @@
                         noAppointments.classList.remove('hidden');
                     }
                 } else {
-                    alert(data.message || 'Error completing appointment');
+                    showError(data.message || 'Error completing appointment');
                 }
             } catch (error) {
                 console.error('Error completing appointment:', error);
-                alert('Error completing appointment');
+                showError('Error completing appointment. Please try again.');
             }
         }
 
@@ -321,12 +345,23 @@
                         statusAvailable.classList.remove('btn-success');
                     }
                 } else {
-                    alert(data.message || 'Error updating status');
+                    showError(data.message || 'Error updating status');
                 }
             } catch (error) {
                 console.error('Error updating status:', error);
-                alert('Error updating status');
+                showError('Error updating status. Please try again.');
             }
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            loginError.classList.remove('hidden');
+            
+            // Hide error after 5 seconds
+            setTimeout(() => {
+                loginError.classList.add('hidden');
+            }, 5000);
         }
 
         // Event Listeners
@@ -359,21 +394,20 @@
                 } else {
                     // Handle different types of errors
                     switch(response.status) {
+                        case 401:
                         case 403:
-                            loginError.textContent = 'Invalid credentials. Please check your email and password.';
+                            showError('Invalid credentials. Please check your email and password.');
                             break;
                         case 500:
-                            loginError.textContent = 'Server error. Please try again later.';
+                            showError('Server error. Please try again later.');
                             break;
                         default:
-                            loginError.textContent = data.message || 'An unexpected error occurred.';
+                            showError(data.message || 'An unexpected error occurred.');
                     }
-                    loginError.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                loginError.textContent = 'Network error. Please check your connection.';
-                loginError.classList.remove('hidden');
+                showError('Network error. Please check your connection.');
             }
         }
 

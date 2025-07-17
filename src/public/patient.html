@@ -281,7 +281,7 @@
             const department = document.getElementById('department').value;
             const appointmentTime = document.getElementById('appointmentTime').value;
             const emergency = document.getElementById('emergency').checked;
-            
+
             try {
                 const response = await fetch('/api/patient/request-appointment', {
                     method: 'POST',
@@ -328,6 +328,8 @@
                     // Try to get user info from the token or pass user details in the appointments response
                     currentUser = { 
                         name: data.user?.name || 'Patient', 
+                        age: data.user?.age || 0,
+                        email: data.user?.email,
                         id: data.user?.id,
                         loggedIn: true 
                     };

@@ -84,7 +84,7 @@ const verifyPatientToken = (req: PatientRequest, res: Response, next: NextFuncti
 patientroute.post("/request-appointment", verifyPatientToken, async (req: any, res: any, next: any) => {
     const { name, age, department, appointmentTime, emergency } = req.body;
     const patientId = req.patientId;
-    
+
     if (!name || !age || !department || !appointmentTime || !patientId) {
         return res.status(400).json({ message: "All fields are required" });
     }
@@ -133,7 +133,8 @@ patientroute.get("/my-appointments", verifyPatientToken, async (req: any, res: a
             user: {
                 id: patient._id,
                 name: patient.name,
-                email: patient.email
+                email: patient.email,
+                age: patient.age,
             }
         });
     } catch (error) {

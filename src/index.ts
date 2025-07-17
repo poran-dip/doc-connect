@@ -27,7 +27,7 @@ app.get("/doctor", (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: any, res: any) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
@@ -40,5 +40,5 @@ app.use((req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
