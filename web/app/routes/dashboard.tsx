@@ -10,6 +10,9 @@ import type { Admin, Appointment, Doctor, Patient } from "../lib/types";
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 
 export async function loader({ request }: Route.LoaderArgs) {
+  console.log("API_URL:", process.env.API_URL);
+  console.log("cookie:", request.headers.get("Cookie"));
+
   const user = await getUserFromRequest(request);
   if (!user) throw redirect("/signin");
 

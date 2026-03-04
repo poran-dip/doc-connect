@@ -6,6 +6,9 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 export async function getUserFromRequest(request: Request): Promise<User | null> {
+  console.log("JWT_SECRET set:", !!process.env.JWT_SECRET);
+  console.log("cookie header:", request.headers.get("Cookie"));
+
   const cookieHeader = request.headers.get("Cookie");
   const token = cookieHeader
     ?.split(";")

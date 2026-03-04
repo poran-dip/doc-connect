@@ -9,6 +9,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  console.log("API_URL:", process.env.API_URL);
+  console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+
   const form = await request.formData();
   const email = form.get("email") as string;
   const password = form.get("password") as string;
