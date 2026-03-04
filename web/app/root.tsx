@@ -20,6 +20,11 @@ export const links: Route.LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
   },
+  { rel: "icon", type: "image/png", href: "/favicon-96x96.png", sizes: "96x96" },
+  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+  { rel: "shortcut icon", href: "/favicon.ico" },
+  { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+  { rel: "manifest", href: "/site.webmanifest" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -28,6 +33,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Doc Connect — simple appointment booking for patients, doctors, and hospitals." />
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="apple-mobile-web-app-title" content="DocConnect" />
+        <meta property="og:title" content="Doc Connect" />
+        <meta property="og:description" content="Simple appointment booking for patients, doctors, and hospitals." />
+        <meta property="og:type" content="website" />
         <title>Doc Connect</title>
         <Meta />
         <Links />
