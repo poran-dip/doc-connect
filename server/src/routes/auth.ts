@@ -5,7 +5,10 @@ import User from "../models/User";
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "dev_secret";
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) throw new Error("JWT_SECRET is not defined");
+
+const JWT_SECRET = jwtSecret;
 const COOKIE_NAME = "token";
 const COOKIE_OPTIONS = {
   httpOnly: true,

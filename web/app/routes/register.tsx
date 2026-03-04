@@ -1,6 +1,7 @@
 import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/register";
 import { getUserFromRequest } from "../lib/auth";
+import { API_URL } from "~/lib/server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUserFromRequest(request);
@@ -16,7 +17,7 @@ export async function action({ request }: Route.ActionArgs) {
   const password = form.get("password") as string;
 
   try {
-    const res = await fetch(`${process.env.API_URL ?? "http://localhost:3000"}/api/auth/signup`, {
+    const res = await fetch(`${API_URL}/api/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, age, password, role: "Patient" }),

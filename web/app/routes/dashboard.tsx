@@ -6,13 +6,9 @@ import PatientDashboard from "../components/dashboard/PatientDashboard";
 import DoctorDashboard from "../components/dashboard/DoctorDashboard";
 import AdminDashboard from "../components/dashboard/AdminDashboard";
 import type { Admin, Appointment, Doctor, Patient } from "../lib/types";
-
-const API_URL = process.env.API_URL ?? "http://localhost:3000";
+import { API_URL } from "~/lib/server";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  console.log("API_URL:", process.env.API_URL);
-  console.log("cookie:", request.headers.get("Cookie"));
-
   const user = await getUserFromRequest(request);
   if (!user) throw redirect("/signin");
 

@@ -1,6 +1,7 @@
 import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/signin";
 import { getUserFromRequest } from "../lib/auth";
+import { API_URL } from "~/lib/server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getUserFromRequest(request);
@@ -9,15 +10,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  console.log("API_URL:", process.env.API_URL);
-  console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
-
   const form = await request.formData();
   const email = form.get("email") as string;
   const password = form.get("password") as string;
 
   try {
-    const res = await fetch(`${process.env.API_URL ?? "http://localhost:3000"}/api/auth/signin`, {
+    const res = await fetch(`${API_URL}/api/auth/signin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
