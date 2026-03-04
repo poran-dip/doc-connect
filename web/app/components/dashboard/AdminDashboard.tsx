@@ -31,10 +31,14 @@ export default function AdminDashboard({
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
     { key: "appointments", label: "Appointments", count: appointments.length },
-    { key: "patients",     label: "Patients",     count: patients.length },
-    { key: "doctors",      label: "Doctors",      count: doctors.length },
-    { key: "admins",       label: "Admins",       count: admins.filter((a) => a._id !== user.id).length },
-    { key: "profile",      label: "Profile" },
+    { key: "patients", label: "Patients", count: patients.length },
+    { key: "doctors", label: "Doctors", count: doctors.length },
+    {
+      key: "admins",
+      label: "Admins",
+      count: admins.filter((a) => a._id !== user.id).length,
+    },
+    { key: "profile", label: "Profile" },
   ];
 
   return (
@@ -54,9 +58,13 @@ export default function AdminDashboard({
           >
             {t.label}
             {t.count !== undefined && (
-              <span className={`text-[0.6875rem] px-1.5 py-0.5 rounded-full ${
-                tab === t.key ? "bg-white/15 text-cream" : "bg-warm-subtle text-warm-muted"
-              }`}>
+              <span
+                className={`text-[0.6875rem] px-1.5 py-0.5 rounded-full ${
+                  tab === t.key
+                    ? "bg-white/15 text-cream"
+                    : "bg-warm-subtle text-warm-muted"
+                }`}
+              >
                 {t.count}
               </span>
             )}
@@ -71,7 +79,11 @@ export default function AdminDashboard({
       )}
 
       {tab === "appointments" && (
-        <AppointmentsTab appointments={appointments} doctors={doctors} isSubmitting={isSubmitting} />
+        <AppointmentsTab
+          appointments={appointments}
+          doctors={doctors}
+          isSubmitting={isSubmitting}
+        />
       )}
       {tab === "patients" && (
         <PatientsTab patients={patients} isSubmitting={isSubmitting} />
@@ -80,14 +92,20 @@ export default function AdminDashboard({
         <DoctorsTab doctors={doctors} isSubmitting={isSubmitting} />
       )}
       {tab === "admins" && (
-        <AdminsTab admins={admins} currentUserId={user.id} isSubmitting={isSubmitting} />
+        <AdminsTab
+          admins={admins}
+          currentUserId={user.id}
+          isSubmitting={isSubmitting}
+        />
       )}
 
       {tab === "profile" && (
         <div className="bg-cream border border-warm-subtle rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-5">
             <User size={16} strokeWidth={1.75} className="text-amber" />
-            <h2 className="font-serif text-[1.1rem] text-warm-dark tracking-tight">Profile settings</h2>
+            <h2 className="font-serif text-[1.1rem] text-warm-dark tracking-tight">
+              Profile settings
+            </h2>
           </div>
           <Form method="post" className="flex flex-col gap-4">
             <input type="hidden" name="intent" value="updateProfile" />
@@ -97,16 +115,40 @@ export default function AdminDashboard({
               </div>
             )}
             <Field label="Name">
-              <input name="name" type="text" defaultValue={user.name} required className={inputCls} />
+              <input
+                name="name"
+                type="text"
+                defaultValue={user.name}
+                required
+                className={inputCls}
+              />
             </Field>
             <Field label="Email">
-              <input name="email" type="email" defaultValue={user.email} required className={inputCls} />
+              <input
+                name="email"
+                type="email"
+                defaultValue={user.email}
+                required
+                className={inputCls}
+              />
             </Field>
             <Field label="Location">
-              <input name="location" type="text" defaultValue={user.location} required className={inputCls} />
+              <input
+                name="location"
+                type="text"
+                defaultValue={user.location}
+                required
+                className={inputCls}
+              />
             </Field>
             <Field label="New password">
-              <input name="password" type="password" placeholder="Leave blank to keep current" autoComplete="new-password" className={inputCls} />
+              <input
+                name="password"
+                type="password"
+                placeholder="Leave blank to keep current"
+                autoComplete="new-password"
+                className={inputCls}
+              />
             </Field>
             <button
               type="submit"

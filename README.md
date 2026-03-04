@@ -71,11 +71,11 @@ Web will be available at `http://localhost:4000`, API at `http://localhost:3000`
 
 After running `npm run seed`, you can sign in with:
 
-| Role    | Email                          | Password      |
-|---------|--------------------------------|---------------|
-| Patient | john.doe@example.com           | password123   |
-| Doctor  | sarah.smith@example.com        | doctor123     |
-| Admin   | admin@example.com              | admin123      |
+| Role    | Email                   | Password    |
+| ------- | ----------------------- | ----------- |
+| Patient | john.doe@example.com    | password123 |
+| Doctor  | sarah.smith@example.com | doctor123   |
+| Admin   | admin@example.com       | admin123    |
 
 ## Comparison with Eazydoc
 

@@ -3,8 +3,8 @@ import type { User } from "../lib/types";
 
 const roleBadge: Record<string, string> = {
   Patient: "bg-amber/10 text-amber",
-  Doctor:  "bg-green-100 text-green-700",
-  Admin:   "bg-warm-subtle text-warm-muted",
+  Doctor: "bg-green-100 text-green-700",
+  Admin: "bg-warm-subtle text-warm-muted",
 };
 
 export default function DashboardNavbar({ user }: { user: User }) {
@@ -12,7 +12,9 @@ export default function DashboardNavbar({ user }: { user: User }) {
     <nav className="flex items-center justify-between px-8 h-14 border-b border-warm-subtle/60 bg-cream/90 backdrop-blur-sm sticky top-0 z-50">
       <Link to="/" className="flex items-center gap-2.5 no-underline">
         <img src="/logo.svg" alt="Doc Connect" className="h-5 w-auto" />
-        <span className="font-serif text-[1.1rem] text-warm-dark tracking-tight">Doc Connect</span>
+        <span className="font-serif text-[1.1rem] text-warm-dark tracking-tight">
+          Doc Connect
+        </span>
       </Link>
 
       <div className="flex items-center gap-3">

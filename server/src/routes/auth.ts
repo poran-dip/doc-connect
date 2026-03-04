@@ -72,14 +72,12 @@ router.post("/signin", async (req: Request, res: Response) => {
     { expiresIn: "7d" },
   );
   res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
-  res
-    .status(200)
-    .json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.get("role"),
-    });
+  res.status(200).json({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.get("role"),
+  });
 });
 
 router.post("/signout", (_req: Request, res: Response) => {

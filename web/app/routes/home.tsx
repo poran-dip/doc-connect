@@ -1,5 +1,11 @@
 import { Link } from "react-router";
-import { CalendarCheck, Stethoscope, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import {
+  CalendarCheck,
+  Stethoscope,
+  ShieldCheck,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 import { getUserFromRequest } from "../lib/auth";
 import type { Route } from "./+types/home";
 import Navbar from "~/components/Navbar";
@@ -15,19 +21,22 @@ const cards = [
     n: "01",
     role: "Patients",
     icon: <CalendarCheck size={18} strokeWidth={1.75} />,
-    description: "Book by department, flag emergencies, and track your appointment status from request to completion.",
+    description:
+      "Book by department, flag emergencies, and track your appointment status from request to completion.",
   },
   {
     n: "02",
     role: "Doctors",
     icon: <Stethoscope size={18} strokeWidth={1.75} />,
-    description: "Review your schedule, update appointment statuses, and mark consultations complete — all in one view.",
+    description:
+      "Review your schedule, update appointment statuses, and mark consultations complete — all in one view.",
   },
   {
     n: "03",
     role: "Admins",
     icon: <ShieldCheck size={18} strokeWidth={1.75} />,
-    description: "Full oversight of patients, doctors, and assignments. Keep every moving part running smoothly.",
+    description:
+      "Full oversight of patients, doctors, and assignments. Keep every moving part running smoothly.",
   },
 ];
 
@@ -62,7 +71,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           className="font-serif text-[clamp(2.8rem,6vw,4.5rem)] font-normal text-warm-dark leading-[1.1] tracking-[-0.02em] max-w-xl mb-5 animate-fade-up"
           style={{ animationDelay: "0.1s" }}
         >
-          Your appointments,<br />
+          Your appointments,
+          <br />
           <em className="italic text-amber">effortlessly</em> managed.
         </h1>
 
@@ -70,7 +80,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           className="text-[0.9375rem] font-light text-warm-muted max-w-sm leading-relaxed mb-9 animate-fade-up"
           style={{ animationDelay: "0.15s" }}
         >
-          Doc Connect brings patients, doctors, and administrators together — booking and managing healthcare visits has never felt this smooth.
+          Doc Connect brings patients, doctors, and administrators together —
+          booking and managing healthcare visits has never felt this smooth.
         </p>
 
         <div
@@ -82,7 +93,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             className="group inline-flex items-center gap-2 text-sm font-medium text-cream bg-warm-dark hover:bg-warm-mid px-6 py-3 rounded-full shadow-[0_2px_12px_rgba(26,23,20,0.18)] hover:shadow-[0_6px_20px_rgba(26,23,20,0.22)] hover:-translate-y-0.5 transition-all duration-200 no-underline"
           >
             Book your first appointment
-            <ArrowRight size={14} strokeWidth={2} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+            <ArrowRight
+              size={14}
+              strokeWidth={2}
+              className="transition-transform duration-200 group-hover:translate-x-0.5"
+            />
           </Link>
           <Link
             to="/signin"
@@ -106,15 +121,21 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <p className="font-serif text-xs italic text-amber/70 mb-5">{n}</p>
             <div className="flex items-center gap-2 mb-3 text-amber">
               {icon}
-              <p className="font-serif text-[1.35rem] font-normal text-warm-dark tracking-[-0.01em]">{role}</p>
+              <p className="font-serif text-[1.35rem] font-normal text-warm-dark tracking-[-0.01em]">
+                {role}
+              </p>
             </div>
-            <p className="text-[0.8125rem] font-light text-warm-muted leading-[1.75]">{description}</p>
+            <p className="text-[0.8125rem] font-light text-warm-muted leading-[1.75]">
+              {description}
+            </p>
           </div>
         ))}
       </section>
 
       <footer className="relative z-10 flex items-center justify-center py-6">
-        <span className="text-xs text-warm-muted/50 tracking-wide">© {(new Date()).getFullYear()} Doc Connect · All rights reserved</span>
+        <span className="text-xs text-warm-muted/50 tracking-wide">
+          © {new Date().getFullYear()} Doc Connect · All rights reserved
+        </span>
       </footer>
     </div>
   );
