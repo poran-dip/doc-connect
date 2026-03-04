@@ -21,7 +21,7 @@ app.use((req, _res, next) => {
 
 app.get("/", async (_req: express.Request, res: express.Response) => {
   res.json({ message: "Server is running" });
-})
+});
 
 app.use("/api", routes);
 
@@ -29,19 +29,27 @@ app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  },
+);
 
 await dbConnect();
 
 const PORT = process.env.PORT;
-if(!PORT) {
+if (!PORT) {
   throw new Error("Port is not defined");
 }
 
-app.listen(PORT)
+app
+  .listen(PORT)
   .on("listening", () => console.log(`Server running on port ${PORT}`))
   .on("error", (err) => {
     console.error("Failed to start server:", err);

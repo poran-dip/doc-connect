@@ -20,27 +20,38 @@ export async function loader({ request }: Route.LoaderArgs) {
   let doctor = null;
 
   if (user.role === "Patient") {
-    const data = await fetch(`${API_URL}/api/appointment?patientId=${user.id}`, {
-      headers: { Cookie: cookie },
-    }).then(r => r.json());
+    const data = await fetch(
+      `${API_URL}/api/appointment?patientId=${user.id}`,
+      {
+        headers: { Cookie: cookie },
+      },
+    ).then((r) => r.json());
     appointments = Array.isArray(data) ? data : [];
   } else if (user.role === "Doctor") {
     const [apptData, doctorData] = await Promise.all([
       fetch(`${API_URL}/api/appointment?assignedDoctor=${user.id}`, {
         headers: { Cookie: cookie },
-      }).then(r => r.json()),
+      }).then((r) => r.json()),
       fetch(`${API_URL}/api/doctor/${user.id}`, {
         headers: { Cookie: cookie },
-      }).then(r => r.json()),
+      }).then((r) => r.json()),
     ]);
     appointments = Array.isArray(apptData) ? apptData : [];
     doctor = doctorData;
   } else if (user.role === "Admin") {
     const [apptData, patientData, doctorData, adminData] = await Promise.all([
-      fetch(`${API_URL}/api/appointment`, { headers: { Cookie: cookie } }).then(r => r.json()),
-      fetch(`${API_URL}/api/patient`, { headers: { Cookie: cookie } }).then(r => r.json()),
-      fetch(`${API_URL}/api/doctor`, { headers: { Cookie: cookie } }).then(r => r.json()),
-      fetch(`${API_URL}/api/admin`, { headers: { Cookie: cookie } }).then(r => r.json()),
+      fetch(`${API_URL}/api/appointment`, { headers: { Cookie: cookie } }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${API_URL}/api/patient`, { headers: { Cookie: cookie } }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${API_URL}/api/doctor`, { headers: { Cookie: cookie } }).then(
+        (r) => r.json(),
+      ),
+      fetch(`${API_URL}/api/admin`, { headers: { Cookie: cookie } }).then((r) =>
+        r.json(),
+      ),
     ]);
     appointments = Array.isArray(apptData) ? apptData : [];
     patients = Array.isArray(patientData) ? patientData : [];
@@ -106,15 +117,17 @@ export async function action({ request }: Route.ActionArgs) {
       email: form.get("email"),
     };
     if (user.role === "Patient") body.age = Number(form.get("age"));
-    if (user.role === "Doctor") body.specialization = form.get("specialization");
+    if (user.role === "Doctor")
+      body.specialization = form.get("specialization");
     const password = form.get("password");
     if (password) body.password = password;
 
-    const endpoint = user.role === "Patient"
-      ? `${API_URL}/api/patient/${user.id}`
-      : user.role === "Doctor"
-      ? `${API_URL}/api/doctor/${user.id}`
-      : `${API_URL}/api/admin/${user.id}`;
+    const endpoint =
+      user.role === "Patient"
+        ? `${API_URL}/api/patient/${user.id}`
+        : user.role === "Doctor"
+          ? `${API_URL}/api/doctor/${user.id}`
+          : `${API_URL}/api/admin/${user.id}`;
 
     const res = await fetch(endpoint, {
       method: "PUT",
@@ -143,7 +156,11 @@ export async function action({ request }: Route.ActionArgs) {
     await fetch(`${API_URL}/api/appointment/${form.get("appointmentId")}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ status: "completed", completedBy: user.id, completedAt: new Date().toISOString() }),
+      body: JSON.stringify({
+        status: "completed",
+        completedBy: user.id,
+        completedAt: new Date().toISOString(),
+      }),
     });
     return redirect("/dashboard");
   }
@@ -153,14 +170,18 @@ export async function action({ request }: Route.ActionArgs) {
     await fetch(`${API_URL}/api/appointment/${form.get("appointmentId")}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ assignedDoctor: form.get("doctorId"), status: "assigned" }),
+      body: JSON.stringify({
+        assignedDoctor: form.get("doctorId"),
+        status: "assigned",
+      }),
     });
     return redirect("/dashboard");
   }
 
   if (intent === "deleteAppointment") {
     await fetch(`${API_URL}/api/appointment/${form.get("id")}`, {
-      method: "DELETE", headers: { Cookie: cookie },
+      method: "DELETE",
+      headers: { Cookie: cookie },
     });
     return redirect("/dashboard");
   }
@@ -185,11 +206,14 @@ export async function action({ request }: Route.ActionArgs) {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"),
-        password: form.get("password"), age: Number(form.get("age")),
+        name: form.get("name"),
+        email: form.get("email"),
+        password: form.get("password"),
+        age: Number(form.get("age")),
       }),
     });
-    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create patient" };
+    if (!res.ok)
+      return { error: (await res.json()).error ?? "Failed to create patient" };
     return redirect("/dashboard");
   }
 
@@ -198,7 +222,9 @@ export async function action({ request }: Route.ActionArgs) {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"), age: Number(form.get("age")),
+        name: form.get("name"),
+        email: form.get("email"),
+        age: Number(form.get("age")),
         ...(form.get("password") ? { password: form.get("password") } : {}),
       }),
     });
@@ -207,7 +233,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "deletePatient") {
     await fetch(`${API_URL}/api/patient/${form.get("id")}`, {
-      method: "DELETE", headers: { Cookie: cookie },
+      method: "DELETE",
+      headers: { Cookie: cookie },
     });
     return redirect("/dashboard");
   }
@@ -218,12 +245,15 @@ export async function action({ request }: Route.ActionArgs) {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"),
-        password: form.get("password"), specialization: form.get("specialization"),
+        name: form.get("name"),
+        email: form.get("email"),
+        password: form.get("password"),
+        specialization: form.get("specialization"),
         status: form.get("status") ?? "available",
       }),
     });
-    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create doctor" };
+    if (!res.ok)
+      return { error: (await res.json()).error ?? "Failed to create doctor" };
     return redirect("/dashboard");
   }
 
@@ -232,8 +262,10 @@ export async function action({ request }: Route.ActionArgs) {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"),
-        specialization: form.get("specialization"), status: form.get("status"),
+        name: form.get("name"),
+        email: form.get("email"),
+        specialization: form.get("specialization"),
+        status: form.get("status"),
         ...(form.get("password") ? { password: form.get("password") } : {}),
       }),
     });
@@ -242,7 +274,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "deleteDoctor") {
     await fetch(`${API_URL}/api/doctor/${form.get("id")}`, {
-      method: "DELETE", headers: { Cookie: cookie },
+      method: "DELETE",
+      headers: { Cookie: cookie },
     });
     return redirect("/dashboard");
   }
@@ -253,11 +286,14 @@ export async function action({ request }: Route.ActionArgs) {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"),
-        password: form.get("password"), location: form.get("location"),
+        name: form.get("name"),
+        email: form.get("email"),
+        password: form.get("password"),
+        location: form.get("location"),
       }),
     });
-    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create admin" };
+    if (!res.ok)
+      return { error: (await res.json()).error ?? "Failed to create admin" };
     return redirect("/dashboard");
   }
 
@@ -266,7 +302,9 @@ export async function action({ request }: Route.ActionArgs) {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({
-        name: form.get("name"), email: form.get("email"), location: form.get("location"),
+        name: form.get("name"),
+        email: form.get("email"),
+        location: form.get("location"),
         ...(form.get("password") ? { password: form.get("password") } : {}),
       }),
     });
@@ -275,7 +313,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "deleteAdmin") {
     await fetch(`${API_URL}/api/admin/${form.get("id")}`, {
-      method: "DELETE", headers: { Cookie: cookie },
+      method: "DELETE",
+      headers: { Cookie: cookie },
     });
     return redirect("/dashboard");
   }
@@ -291,11 +330,14 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
       <DashboardNavbar user={user} />
       <main className="max-w-5xl mx-auto px-8 py-8">
         {user.role === "Patient" && (
-          <PatientDashboard user={user as Patient} appointments={appointments} />
+          <PatientDashboard
+            user={user as Patient}
+            appointments={appointments}
+          />
         )}
         {user.role === "Doctor" && (
           <DoctorDashboard
-            user={{ ...user, ...(loaderData as any).doctor} as Doctor}
+            user={{ ...user, ...(loaderData as any).doctor } as Doctor}
             appointments={loaderData.appointments}
           />
         )}

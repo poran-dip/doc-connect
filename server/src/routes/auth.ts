@@ -27,11 +27,23 @@ router.post("/signup", async (req: Request, res: Response) => {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, password: hashed, role, ...rest });
+  const user = await User.create({
+    name,
+    email,
+    password: hashed,
+    role,
+    ...rest,
+  });
 
-  const token = jwt.sign({ id: user._id, role, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign(
+    { id: user._id, role, name: user.name, email: user.email },
+    JWT_SECRET,
+    { expiresIn: "7d" },
+  );
   res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
-  res.status(201).json({ id: user._id, name: user.name, email: user.email, role });
+  res
+    .status(201)
+    .json({ id: user._id, name: user.name, email: user.email, role });
 });
 
 router.post("/signin", async (req: Request, res: Response) => {
@@ -49,9 +61,25 @@ router.post("/signin", async (req: Request, res: Response) => {
     return;
   }
 
-  const token = jwt.sign({ id: user._id, role: user.get("role"), name: user.name, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: user.get("role"),
+      name: user.name,
+      email: user.email,
+    },
+    JWT_SECRET,
+    { expiresIn: "7d" },
+  );
   res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
-  res.status(200).json({ id: user._id, name: user.name, email: user.email, role: user.get("role") });
+  res
+    .status(200)
+    .json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.get("role"),
+    });
 });
 
 router.post("/signout", (_req: Request, res: Response) => {

@@ -17,7 +17,9 @@ export default function NotFound({ loaderData }: Route.ComponentProps) {
       <Navbar user={user} />
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-3">
         <p className="text-6xl font-bold text-blue-500">404</p>
-        <h1 className="text-xl font-semibold text-slate-700 tracking-tight">Page not found</h1>
+        <h1 className="text-xl font-semibold text-slate-700 tracking-tight">
+          Page not found
+        </h1>
         <p className="text-sm text-slate-400 max-w-xs">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -30,12 +32,18 @@ export default function NotFound({ loaderData }: Route.ComponentProps) {
               >
                 ← Go back
               </button>
-              <Link to="/dashboard" className="text-sm bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-4 py-1.5 transition-colors">
+              <Link
+                to="/dashboard"
+                className="text-sm bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-4 py-1.5 transition-colors"
+              >
                 Dashboard
               </Link>
             </>
           ) : (
-            <Link to="/" className="text-sm bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-4 py-1.5 transition-colors">
+            <Link
+              to="/"
+              className="text-sm bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full px-4 py-1.5 transition-colors"
+            >
               Back to home
             </Link>
           )}

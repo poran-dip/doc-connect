@@ -1,4 +1,10 @@
-import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
+import {
+  Form,
+  Link,
+  redirect,
+  useActionData,
+  useNavigation,
+} from "react-router";
 import type { Route } from "./+types/signin";
 import { getUserFromRequest } from "../lib/auth";
 import { API_URL } from "~/lib/server";
@@ -45,11 +51,18 @@ export default function Signin() {
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-blue-600 tracking-tight">Doc Connect</h1>
-          <p className="text-slate-400 text-sm mt-0.5">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-blue-600 tracking-tight">
+            Doc Connect
+          </h1>
+          <p className="text-slate-400 text-sm mt-0.5">
+            Sign in to your account
+          </p>
         </div>
 
-        <Link to="/" className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-blue-500 transition-colors mb-4">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-blue-500 transition-colors mb-4"
+        >
           ← Back to home
         </Link>
 
@@ -62,7 +75,12 @@ export default function Signin() {
             )}
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="email" className="text-xs font-medium text-slate-500">Email</label>
+              <label
+                htmlFor="email"
+                className="text-xs font-medium text-slate-500"
+              >
+                Email
+              </label>
               <input
                 id="email"
                 name="email"
@@ -75,7 +93,12 @@ export default function Signin() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="password" className="text-xs font-medium text-slate-500">Password</label>
+              <label
+                htmlFor="password"
+                className="text-xs font-medium text-slate-500"
+              >
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -99,7 +122,10 @@ export default function Signin() {
 
         <p className="text-center text-slate-400 text-xs mt-4">
           New to Doc Connect?{" "}
-          <Link to="/register" className="text-blue-500 hover:text-blue-600 font-medium transition-colors">
+          <Link
+            to="/register"
+            className="text-blue-500 hover:text-blue-600 font-medium transition-colors"
+          >
             Create an account
           </Link>
         </p>

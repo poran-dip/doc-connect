@@ -6,7 +6,9 @@ if (!secret) throw new Error("JWT_SECRET is not defined");
 
 const JWT_SECRET = new TextEncoder().encode(secret);
 
-export async function getUserFromRequest(request: Request): Promise<User | null> {
+export async function getUserFromRequest(
+  request: Request,
+): Promise<User | null> {
   const cookieHeader = request.headers.get("Cookie");
   const token = cookieHeader
     ?.split(";")

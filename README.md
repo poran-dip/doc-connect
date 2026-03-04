@@ -17,7 +17,7 @@ We originally planned to use the MERN stack, but ended up using HTML instead of 
 - TypeScript
 - JSONWebToken
 
-This project is very incomplete and I do not plan on spending any more time developing it, but feel free to look explore if you want to have a peek at my dev journey. 
+This project is very incomplete and I do not plan on spending any more time developing it, but feel free to look explore if you want to have a peek at my dev journey.
 
 ## Getting Started
 
@@ -36,7 +36,7 @@ Run `npm run seed` if you want to populate your database with some dummy entries
 
 ## Final Thoughts
 
-If you feel inspired by this to make something of your own, by all means do so! I have included an MIT License if you ever end up making anything cool. 
+If you feel inspired by this to make something of your own, by all means do so! I have included an MIT License if you ever end up making anything cool.
 
 That said, check out my repository [Eazydoc](https://github.com/poran-dip/eazy-doc) if you want to view an actually functional and polished version of this project. Eazydoc was made for the GDG On Campus Solution Challenge, 2025, where I and Dikshayn teamed up with Rajdeep and Hirok. Compared to Doc Connect, it's a full on glow-up!
 
