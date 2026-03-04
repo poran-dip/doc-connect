@@ -18,7 +18,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap",
   },
   {
     rel: "icon",
@@ -42,7 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           name="description"
           content="Doc Connect — simple appointment booking for patients, doctors, and hospitals."
         />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#1a1714" />
         <meta name="apple-mobile-web-app-title" content="DocConnect" />
         <meta property="og:title" content="Doc Connect" />
         <meta
@@ -54,7 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-background text-foreground antialiased">
+      <body className="bg-cream text-warm-dark antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -79,11 +79,18 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const isNotFound = isRouteErrorResponse(error) && error.status === 404;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-      <h1 className="text-4xl font-semibold">{isNotFound ? "404" : "Error"}</h1>
-      <p className="text-muted-foreground">{message}</p>
+    <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-3 p-8 text-center">
+      <p className="font-serif text-[6rem] leading-none text-warm-subtle select-none">
+        {isNotFound ? "404" : "!"}
+      </p>
+      <h1 className="font-serif text-[1.5rem] text-warm-dark tracking-tight">
+        {isNotFound ? "Page not found" : "Something went wrong"}
+      </h1>
+      <p className="text-[0.8125rem] font-light text-warm-muted max-w-xs leading-relaxed">
+        {message}
+      </p>
       {import.meta.env.DEV && error instanceof Error && error.stack && (
-        <pre className="mt-4 w-full max-w-2xl rounded-lg bg-muted p-4 text-sm overflow-x-auto">
+        <pre className="mt-4 w-full max-w-2xl rounded-xl bg-warm-subtle/60 border border-warm-subtle px-5 py-4 text-xs text-warm-muted overflow-x-auto text-left">
           {error.stack}
         </pre>
       )}

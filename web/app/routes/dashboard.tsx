@@ -18,40 +18,28 @@ export async function loader({ request }: Route.LoaderArgs) {
   let doctors: Doctor[] = [];
   let admins: Admin[] = [];
   let doctor = null;
+  let patient = null;
 
   if (user.role === "Patient") {
-    const data = await fetch(
-      `${API_URL}/api/appointment?patientId=${user.id}`,
-      {
-        headers: { Cookie: cookie },
-      },
-    ).then((r) => r.json());
-    appointments = Array.isArray(data) ? data : [];
+    const [apptData, patientData] = await Promise.all([
+      fetch(`${API_URL}/api/appointment?patientId=${user.id}`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+      fetch(`${API_URL}/api/patient/${user.id}`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+    ]);
+    appointments = Array.isArray(apptData) ? apptData : [];
+    patient = patientData;
   } else if (user.role === "Doctor") {
     const [apptData, doctorData] = await Promise.all([
-      fetch(`${API_URL}/api/appointment?assignedDoctor=${user.id}`, {
-        headers: { Cookie: cookie },
-      }).then((r) => r.json()),
-      fetch(`${API_URL}/api/doctor/${user.id}`, {
-        headers: { Cookie: cookie },
-      }).then((r) => r.json()),
+      fetch(`${API_URL}/api/appointment?assignedDoctor=${user.id}`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+      fetch(`${API_URL}/api/doctor/${user.id}`, { headers: { Cookie: cookie } }).then((r) => r.json()),
     ]);
     appointments = Array.isArray(apptData) ? apptData : [];
     doctor = doctorData;
   } else if (user.role === "Admin") {
     const [apptData, patientData, doctorData, adminData] = await Promise.all([
-      fetch(`${API_URL}/api/appointment`, { headers: { Cookie: cookie } }).then(
-        (r) => r.json(),
-      ),
-      fetch(`${API_URL}/api/patient`, { headers: { Cookie: cookie } }).then(
-        (r) => r.json(),
-      ),
-      fetch(`${API_URL}/api/doctor`, { headers: { Cookie: cookie } }).then(
-        (r) => r.json(),
-      ),
-      fetch(`${API_URL}/api/admin`, { headers: { Cookie: cookie } }).then((r) =>
-        r.json(),
-      ),
+      fetch(`${API_URL}/api/appointment`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+      fetch(`${API_URL}/api/patient`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+      fetch(`${API_URL}/api/doctor`, { headers: { Cookie: cookie } }).then((r) => r.json()),
+      fetch(`${API_URL}/api/admin`, { headers: { Cookie: cookie } }).then((r) => r.json()),
     ]);
     appointments = Array.isArray(apptData) ? apptData : [];
     patients = Array.isArray(patientData) ? patientData : [];
@@ -59,7 +47,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     admins = Array.isArray(adminData) ? adminData : [];
   }
 
-  return { user, appointments, patients, doctors, admins, doctor };
+  return { user, appointments, patients, doctors, admins, doctor, patient };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -80,12 +68,10 @@ export async function action({ request }: Route.ActionArgs) {
         emergency: form.get("emergency") === "true",
       }),
     });
-
     if (!res.ok) {
       const data = await res.json();
       return { error: data.error ?? "Failed to book appointment" };
     }
-
     return redirect("/dashboard");
   }
 
@@ -117,29 +103,25 @@ export async function action({ request }: Route.ActionArgs) {
       email: form.get("email"),
     };
     if (user.role === "Patient") body.age = Number(form.get("age"));
-    if (user.role === "Doctor")
-      body.specialization = form.get("specialization");
+    if (user.role === "Doctor") body.specialization = form.get("specialization");
+    if (user.role === "Admin") body.location = form.get("location");
     const password = form.get("password");
     if (password) body.password = password;
 
     const endpoint =
-      user.role === "Patient"
-        ? `${API_URL}/api/patient/${user.id}`
-        : user.role === "Doctor"
-          ? `${API_URL}/api/doctor/${user.id}`
-          : `${API_URL}/api/admin/${user.id}`;
+      user.role === "Patient" ? `${API_URL}/api/patient/${user.id}`
+      : user.role === "Doctor" ? `${API_URL}/api/doctor/${user.id}`
+      : `${API_URL}/api/admin/${user.id}`;
 
     const res = await fetch(endpoint, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify(body),
     });
-
     if (!res.ok) {
       const data = await res.json();
       return { error: data.error ?? "Failed to update profile" };
     }
-
     return { success: "Profile updated successfully" };
   }
 
@@ -165,15 +147,11 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect("/dashboard");
   }
 
-  // Appointments
   if (intent === "assignDoctor") {
     await fetch(`${API_URL}/api/appointment/${form.get("appointmentId")}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({
-        assignedDoctor: form.get("doctorId"),
-        status: "assigned",
-      }),
+      body: JSON.stringify({ assignedDoctor: form.get("doctorId"), status: "assigned" }),
     });
     return redirect("/dashboard");
   }
@@ -200,7 +178,6 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect("/dashboard");
   }
 
-  // Patients
   if (intent === "createPatient") {
     const res = await fetch(`${API_URL}/api/patient`, {
       method: "POST",
@@ -212,8 +189,7 @@ export async function action({ request }: Route.ActionArgs) {
         age: Number(form.get("age")),
       }),
     });
-    if (!res.ok)
-      return { error: (await res.json()).error ?? "Failed to create patient" };
+    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create patient" };
     return redirect("/dashboard");
   }
 
@@ -239,7 +215,6 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect("/dashboard");
   }
 
-  // Doctors
   if (intent === "createDoctor") {
     const res = await fetch(`${API_URL}/api/doctor`, {
       method: "POST",
@@ -252,8 +227,7 @@ export async function action({ request }: Route.ActionArgs) {
         status: form.get("status") ?? "available",
       }),
     });
-    if (!res.ok)
-      return { error: (await res.json()).error ?? "Failed to create doctor" };
+    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create doctor" };
     return redirect("/dashboard");
   }
 
@@ -280,7 +254,6 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect("/dashboard");
   }
 
-  // Admins
   if (intent === "createAdmin") {
     const res = await fetch(`${API_URL}/api/admin`, {
       method: "POST",
@@ -292,8 +265,7 @@ export async function action({ request }: Route.ActionArgs) {
         location: form.get("location"),
       }),
     });
-    if (!res.ok)
-      return { error: (await res.json()).error ?? "Failed to create admin" };
+    if (!res.ok) return { error: (await res.json()).error ?? "Failed to create admin" };
     return redirect("/dashboard");
   }
 
@@ -326,12 +298,12 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const { user, appointments } = loaderData;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-cream">
       <DashboardNavbar user={user} />
-      <main className="max-w-5xl mx-auto px-8 py-8">
+      <main className="max-w-5xl mx-auto px-8 py-10">
         {user.role === "Patient" && (
           <PatientDashboard
-            user={user as Patient}
+            user={{ ...user, ...(loaderData as any).patient } as Patient}
             appointments={appointments}
           />
         )}
@@ -343,7 +315,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
         )}
         {user.role === "Admin" && (
           <AdminDashboard
-            user={user as Admin}
+            user={{ ...user, ...((loaderData as any).admins ?? []).find((a: Admin) => a._id === user.id) } as Admin}
             appointments={loaderData.appointments}
             patients={(loaderData as any).patients ?? []}
             doctors={(loaderData as any).doctors ?? []}

@@ -35,16 +35,18 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     const setCookie = res.headers.get("set-cookie");
-
     return redirect("/dashboard", {
       headers: setCookie ? { "Set-Cookie": setCookie } : {},
     });
   } catch (err) {
-    return {
-      error: err instanceof Error ? err.message : "Registration failed",
-    };
+    return { error: err instanceof Error ? err.message : "Registration failed" };
   }
 }
+
+const inputClass =
+  "w-full bg-warm-subtle/40 border border-warm-subtle hover:border-warm-muted/40 rounded-xl px-3.5 py-2.5 text-sm text-warm-dark placeholder:text-warm-muted/50 focus:outline-none focus:border-amber/50 focus:ring-2 focus:ring-amber/10 transition-all duration-200";
+
+const labelClass = "text-[0.7rem] font-medium text-warm-muted uppercase tracking-[0.08em]";
 
 export default function Register() {
   const actionData = useActionData<typeof action>();
@@ -52,124 +54,90 @@ export default function Register() {
   const isSubmitting = navigation.state === "submitting";
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-blue-600 tracking-tight">
-            Doc Connect
-          </h1>
-          <p className="text-slate-400 text-sm mt-0.5">
-            Create a patient account
+    <div className="min-h-screen bg-cream flex">
+      {/* Left decorative panel */}
+      <div className="hidden lg:flex flex-col justify-between w-105 shrink-0 bg-warm-dark px-12 py-14">
+        <Link to="/" className="flex items-center gap-2.5 no-underline">
+          <img src="/logo.svg" alt="Doc Connect" className="h-6 w-auto brightness-0 invert" />
+          <span className="font-serif text-[1.25rem] text-cream tracking-tight">Doc Connect</span>
+        </Link>
+        <div>
+          <p className="font-serif text-[2rem] text-cream leading-[1.2] tracking-tight mb-4">
+            Healthcare at your<br /><em className="italic text-amber">fingertips.</em>
+          </p>
+          <p className="text-[0.8125rem] text-cream/50 leading-relaxed font-light">
+            Join thousands of patients managing their appointments with ease.
           </p>
         </div>
+        <p className="text-[0.6875rem] text-cream/25 tracking-wide">© {(new Date()).getFullYear()} Doc Connect</p>
+      </div>
 
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-blue-500 transition-colors mb-4"
-        >
-          ← Back to home
-        </Link>
+      {/* Form panel */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <Link to="/" className="flex items-center justify-center gap-2 mb-8 lg:hidden no-underline">
+            <img src="/logo.svg" alt="" className="h-6 w-auto" />
+            <span className="font-serif text-[1.2rem] text-warm-dark">Doc Connect</span>
+          </Link>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <Form method="post" className="flex flex-col gap-3">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-[0.75rem] text-warm-muted hover:text-warm-dark transition-colors mb-7 no-underline"
+          >
+            ← Back to home
+          </Link>
+
+          <h2 className="font-serif text-[1.75rem] text-warm-dark tracking-tight leading-tight mb-1">
+            Create an account
+          </h2>
+          <p className="text-[0.8125rem] text-warm-muted font-light mb-8">
+            Start booking appointments today.
+          </p>
+
+          <Form method="post" className="flex flex-col gap-4">
             {actionData?.error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2 text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-3.5 py-2.5 text-[0.8125rem]">
                 {actionData.error}
               </div>
             )}
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="name"
-                className="text-xs font-medium text-slate-500"
-              >
-                Full name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="John Doe"
-                required
-                autoComplete="name"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
-              />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="name" className={labelClass}>Full name</label>
+              <input id="name" name="name" type="text" placeholder="John Doe" required autoComplete="name" className={inputClass} />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="email"
-                className="text-xs font-medium text-slate-500"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                required
-                autoComplete="email"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
-              />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className={labelClass}>Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" required autoComplete="email" className={inputClass} />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="age"
-                className="text-xs font-medium text-slate-500"
-              >
-                Age
-              </label>
-              <input
-                id="age"
-                name="age"
-                type="number"
-                placeholder="25"
-                min={0}
-                max={120}
-                required
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
-              />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="age" className={labelClass}>Age</label>
+              <input id="age" name="age" type="number" placeholder="25" min={0} max={120} required className={inputClass} />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="password"
-                className="text-xs font-medium text-slate-500"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                autoComplete="new-password"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors"
-              />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className={labelClass}>Password</label>
+              <input id="password" name="password" type="password" placeholder="••••••••" required autoComplete="new-password" className={inputClass} />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-1 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-full py-2 text-sm transition-colors cursor-pointer"
+              className="mt-2 w-full bg-warm-dark hover:bg-warm-mid disabled:opacity-50 disabled:cursor-not-allowed text-cream font-medium rounded-full py-2.5 text-sm transition-all duration-200 hover:-translate-y-px shadow-[0_2px_12px_rgba(26,23,20,0.15)] cursor-pointer"
             >
               {isSubmitting ? "Creating account…" : "Create account"}
             </button>
           </Form>
-        </div>
 
-        <p className="text-center text-slate-400 text-xs mt-4">
-          Already have an account?{" "}
-          <Link
-            to="/signin"
-            className="text-blue-500 hover:text-blue-600 font-medium transition-colors"
-          >
-            Sign in
-          </Link>
-        </p>
+          <p className="text-center text-warm-muted text-[0.75rem] mt-6">
+            Already have an account?{" "}
+            <Link to="/signin" className="text-amber hover:text-amber/80 font-medium transition-colors no-underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
