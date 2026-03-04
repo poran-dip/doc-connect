@@ -1,45 +1,94 @@
 # Doc Connect
 
-**Doc Connect** was made for **Codestellation, 2025**, which is a hackathon organized as a part of **Udbhavanam**, a tech event held annually in **Assam Engineering College**.
+**Doc Connect** was originally made for **Codestellation 2025**, a hackathon organized as part of **Udbhavanam 12.0** under **Pyrokinesis 2025**, the annual tech event held at **Assam Engineering College** for the year 2025. I teamed up with [Parashar Deb](https://github.com/ParasharDeb), [Dikshyan Chakraborty](https://github.com/Dikshyan), and Yashuwanta Bungurung.
 
-This was also my first attempt at a full-fledged app, and I teamed up with [Parashar Deb](https://github.com/ParasharDeb) (ETE, AEC), [Dikshyan Chakraborty](https://github.com/Dikshyan) (CSE, ADTU), and Yashuwanta Bungurung, (ETE, AEC).
+The original hackathon submission (plain HTML, no React, no proper auth) lives in the [`hackathon-legacy`](https://github.com/poran-dip/doc-connect/tree/hackathon-legacy) branch. What you're looking at now is a complete rewrite — same concept, done properly.
 
-The original hackathon version is in the [`hackathon-legacy`](https://github.com/poran-dip/doc-connect/tree/hackathon-legacy) branch, but I recommend just cloning `main` as it has the same stuff as `project.zip`, without bloat like `node_modules/`, and has a proper dev script.
+## What It Does
+
+Doc Connect is a healthcare appointment management system with three distinct user roles:
+
+- **Patients** — book appointments by department, flag emergencies, track appointment status, edit or cancel upcoming appointments
+- **Doctors** — view assigned appointments, mark them as completed, manage their availability status
+- **Admins** — full CRUD access across all patients, doctors, appointments, and other admins; assign available doctors to upcoming appointments
 
 ## Tech Stack
 
-We originally planned to use the MERN stack, but ended up using HTML instead of React, so our complete stack:
+Full MERN stack, properly this time:
 
-- MongoDB
-- Express
-- Node.js
-- HTML
-- TypeScript
-- JSONWebToken
+- **MongoDB** + **Mongoose** — database with discriminator-based user models
+- **Express** + **Node.js** — REST API with role-based authentication and authorization
+- **React** via **React Router v7** — SSR-enabled frontend with file-based routing
+- **TypeScript** — end to end, both client and server
+- **bcryptjs** — password hashing
+- **jose** + **jsonwebtoken** — JWT-based auth with HTTP-only cookie persistence
+- **Tailwind CSS v4** — styling
+- **Vite** — frontend build tool
+- **Docker** — containerized deployment
 
-This project is very incomplete and I do not plan on spending any more time developing it, but feel free to look explore if you want to have a peek at my dev journey.
+## Project Structure
+
+```bash
+doc-connect/
+├── server/   # Express REST API
+└── web/      # React Router v7 SSR frontend
+```
 
 ## Getting Started
 
-Open your terminal, and run the following commands (one line at a time):
+Make sure you have Node.js and MongoDB running locally.
 
 ```bash
+# Clone the repo
 git clone https://github.com/poran-dip/doc-connect
 cd doc-connect
-npm install
-npm run dev
+
+# Install dependencies
+cd server && npm install
+cd ../web && npm install
+
+# Set up environment variables
+cp server/.env.example server/.env
+cp web/.env.example web/.env
+
+# Seed the database
+cd server && npm run seed
+
+# Start both services
+cd server && npm run dev   # runs on http://localhost:3000
+cd web && npm run dev      # runs on http://localhost:5173
 ```
 
-Make sure you also have a MongoDB server running locally. By default, the app looks for a database named `doc_connect` running at `mongodb://127.0.0.1:27017/doc_connect`, but you can adjust that in [`src/database/db.ts`](/src/database/db.ts).
+Or with Docker:
 
-Run `npm run seed` if you want to populate your database with some dummy entries (check [`src/database/seed.ts`](/src/database/seed.ts) for the dummy credentials).
+```bash
+docker compose up --build
+```
 
-## Final Thoughts
+Web will be available at `http://localhost:4000`, API at `http://localhost:3000`.
 
-If you feel inspired by this to make something of your own, by all means do so! I have included an MIT License if you ever end up making anything cool.
+## Seed Credentials
 
-That said, check out my repository [Eazydoc](https://github.com/poran-dip/eazy-doc) if you want to view an actually functional and polished version of this project. Eazydoc was made for the GDG On Campus Solution Challenge, 2025, where I and Dikshayn teamed up with Rajdeep and Hirok. Compared to Doc Connect, it's a full on glow-up!
+After running `npm run seed`, you can sign in with:
 
-Thanks again for checking this out! Keep building cool stuff, have a good day and peace!
+| Role    | Email                          | Password      |
+|---------|--------------------------------|---------------|
+| Patient | john.doe@example.com           | password123   |
+| Doctor  | sarah.smith@example.com        | doctor123     |
+| Admin   | admin@example.com              | admin123      |
+
+## Comparison with Eazydoc
+
+[Eazydoc](https://github.com/poran-dip/eazy-doc) was built for the GDG On Campus Solution Challenge 2025 and is the spiritual successor to this project. It has a more impressive UI. That said, Doc Connect v2 holds its own in several ways:
+
+- Proper JWT authentication with HTTP-only cookies — Eazydoc's auth is more ad-hoc
+- MongoDB access controls and role-based authorization baked in at the API level — Eazydoc’s database layer was optimized for rapid hackathon iteration (not as secure)
+- Fully containerized with Docker — Eazydoc has none of that
+- Clean client/server separation with a proper REST API — Eazydoc mixes concerns
+- Every feature that exists actually works — no mock data or unimplemented stubs
+
+They're different projects solving the same problem at different levels of polish and in different directions. Doc Connect v2 prioritizes correctness and architecture; Eazydoc prioritizes UI and feature breadth. Both are works in progress.
+
+Licensed under Apache 2.0 — build something cool with it.
 
 — Poran Dip
