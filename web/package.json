@@ -27,6 +27,6 @@
     "tailwindcss": "^4.2.4",
     "typescript": "^5.9.2",
     "vite": "^7.3.2",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^6.1.1"
   }
 }
